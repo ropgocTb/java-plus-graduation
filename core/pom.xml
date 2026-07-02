@@ -13,6 +13,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>ewm-main-service</module>
+        <module>main-service</module>
     </modules>
 </project>
