@@ -56,7 +56,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> getEvents(SearchParamsAdmin searchParamsAdmin) {
 
-        Pageable pr = PaginationUtil.createPageRequest(searchParamsAdmin.getFrom(), searchParamsAdmin.getSize());
+        Pageable pageRequest = PaginationUtil.createPageRequest(searchParamsAdmin.getFrom(), searchParamsAdmin.getSize());
 
         List<Event> events;
 
@@ -80,7 +80,7 @@ public class EventServiceImpl implements EventService {
             spec = spec.and(afterNow());
         }
 
-        events = eventRepository.findAll(spec, pr).getContent();
+        events = eventRepository.findAll(spec, pageRequest).getContent();
 
         enrichEvents(events);
 
@@ -89,7 +89,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEvents(SearchParams searchParams, HttpServletRequest request) {
-        Pageable pr = PaginationUtil.createPageRequest(searchParams.getFrom(), searchParams.getSize());
+        Sort sort = getSort(searchParams.getSort());
+
+        Pageable pageRequest = PaginationUtil.createPageRequestSorted(searchParams.getFrom(),
+                searchParams.getSize(), sort);
 
         List<Event> events;
 
@@ -113,7 +116,7 @@ public class EventServiceImpl implements EventService {
             specification = specification.and(onlyAvailable());
         }
 
-        events = eventRepository.findAll(specification, pr).getContent();
+        events = eventRepository.findAll(specification, pageRequest).getContent();
 
         enrichEvents(events);
 
@@ -124,9 +127,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getUserEvents(Long userId, int from, int size) {
-        Pageable pr = PaginationUtil.createPageRequest(from, size);
+        Pageable pageRequest = PaginationUtil.createPageRequest(from, size);
 
-        List<Event> events = eventRepository.findAllByInitiator_Id(userId, pr);
+        List<Event> events = eventRepository.findAllByInitiator_Id(userId, pageRequest);
 
         enrichEvents(events);
 

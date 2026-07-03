@@ -13,4 +13,12 @@ public class PaginationUtil {
         int page = from / size;
         return PageRequest.of(page, size, Sort.by("id").ascending());
     }
+
+    public static Pageable createPageRequestSorted(int from, int size, Sort sort) {
+        if (from < 0 || size <= 0) {
+            throw new IllegalArgumentException("Параметры пагинации некорректные");
+        }
+        int page = from / size;
+        return PageRequest.of(page, size, sort);
+    }
 }
