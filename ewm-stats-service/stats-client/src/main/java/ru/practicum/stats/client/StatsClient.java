@@ -1,46 +1,28 @@
 package ru.practicum.stats.client;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.stats.dto.StatRequestDto;
 import ru.practicum.stats.dto.StatResponseDto;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Service
-public class StatsClient {
-    private final RestClient restClient;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+@FeignClient(name = "stats-server")
+public interface StatsClient {
 
-    public StatsClient(@Value("${stats-server.url}") String url) {
-        this.restClient = RestClient.create(url);
-    }
+    @PostMapping("/hit")
+    void hit(@RequestBody StatRequestDto dto);
 
-    public void hit(StatRequestDto dto) {
-        restClient.post()
-                .uri("/hit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(dto)
-                .retrieve()
-                .toBodilessEntity();
-    }
-
-    public List<StatResponseDto> getStats(LocalDateTime start, LocalDateTime end,
-                                          List<String> uris, boolean unique) {
-        return restClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/stats")
-                        .queryParam("start", start.format(FORMATTER))
-                        .queryParam("end", end.format(FORMATTER))
-                        .queryParam("uris", uris)
-                        .queryParam("unique", unique)
-                        .build())
-                .retrieve()
-                .body(new ParameterizedTypeReference<List<StatResponseDto>>() {});
-    }
+    @GetMapping("/stats")
+    List<StatResponseDto> getStats( @RequestParam("start")
+                                    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+                                    @RequestParam("end")
+                                    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+                                    @RequestParam(value = "uris", required = false) List<String> uris,
+                                    @RequestParam("unique") boolean unique);
 }
