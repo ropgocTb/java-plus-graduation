@@ -3,18 +3,18 @@ package ru.practicum.main.request.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.interaction.contract.user.PublicUserClient;
+import ru.practicum.interaction.dto.user.UserDto;
+import ru.practicum.interaction.exception.ConflictException;
+import ru.practicum.interaction.exception.NotFoundException;
 import ru.practicum.main.event.model.Event;
 import ru.practicum.main.event.model.EventState;
 import ru.practicum.main.event.repository.EventRepository;
-import ru.practicum.main.exception.ConflictException;
-import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.request.dto.ParticipationRequestDto;
 import ru.practicum.main.request.mapper.RequestMapper;
 import ru.practicum.main.request.model.Request;
 import ru.practicum.main.request.model.RequestStatus;
 import ru.practicum.main.request.repository.RequestRepository;
-import ru.practicum.main.user.model.User;
-import ru.practicum.main.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,22 +25,20 @@ public class RequestServiceImpl implements RequestService {
 
     private final RequestMapper requestMapper;
     private final RequestRepository requestRepository;
-    private final UserRepository userRepository;
+    private final PublicUserClient userClient;
     private final EventRepository eventRepository;
 
     @Override
     @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new NotFoundException("User with id=" + userId + " not found"));
+        UserDto user = userClient.getUserById(userId);
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() ->
                         new NotFoundException("Event with id=" + eventId + " not found"));
 
-        if (event.getInitiator().getId().equals(userId)) {
+        if (event.getInitiator().equals(userId)) {
             throw new ConflictException("Initiator cannot request participation in own event");
         }
 
@@ -48,7 +46,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Cannot participate in unpublished event");
         }
 
-        if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
+        if (requestRepository.existsByRequesterAndEventId(userId, eventId)) {
             throw new ConflictException("Duplicate participation request");
         }
 
@@ -71,7 +69,7 @@ public class RequestServiceImpl implements RequestService {
 
         Request request = Request.builder()
                 .event(event)
-                .requester(user)
+                .requester(user.getId())
                 .created(LocalDateTime.now())
                 .status(status)
                 .build();
@@ -83,11 +81,11 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
-        if (!userRepository.existsById(userId)) {
+        if (!userClient.existsById(userId)) {
             throw new NotFoundException("User with id=" + userId + " not found");
         }
 
-        List<Request> existingRequests = requestRepository.findAllByRequesterId(userId);
+        List<Request> existingRequests = requestRepository.findAllByRequester(userId);
         return requestMapper.mapToListParticipationRequestDto(existingRequests);
     }
 
@@ -96,10 +94,10 @@ public class RequestServiceImpl implements RequestService {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request with id=" + requestId + " not found"));
 
-        if (!userRepository.existsById(userId)) {
+        if (!userClient.existsById(userId)) {
             throw new NotFoundException("User with id=" + userId + " not found");
         }
-        if (!request.getRequester().getId().equals(userId)) {
+        if (!request.getRequester().equals(userId)) {
             throw new ConflictException("User cannot cancel request of another user");
         }
 

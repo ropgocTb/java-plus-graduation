@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.interaction.exception.NotFoundException;
+import ru.practicum.interaction.util.PaginationUtil;
 import ru.practicum.main.compilations.dto.CompilationDto;
 import ru.practicum.main.compilations.dto.NewCompilationDto;
 import ru.practicum.main.compilations.dto.UpdateCompilationRequest;
@@ -14,8 +16,6 @@ import ru.practicum.main.event.dto.EventShortDto;
 import ru.practicum.main.event.mapper.EventMapper;
 import ru.practicum.main.event.model.Event;
 import ru.practicum.main.event.repository.EventRepository;
-import ru.practicum.main.exception.NotFoundException;
-import ru.practicum.main.util.PaginationUtil;
 
 import java.util.*;
 

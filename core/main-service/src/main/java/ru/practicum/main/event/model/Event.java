@@ -1,11 +1,9 @@
 package ru.practicum.main.event.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import ru.practicum.main.category.model.Category;
-import ru.practicum.main.user.model.User;
 
 import java.time.LocalDateTime;
 
@@ -37,9 +35,8 @@ public class Event {
     @Column(name = "event_date")
     private LocalDateTime eventDate;
 
-    @ManyToOne
-    @JoinColumn(name = "initiator_id")
-    private User initiator;
+    @Column(name = "initiator_id")
+    private Long initiator;
 
     @Length(max = 7000)
     private String description;

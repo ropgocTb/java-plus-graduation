@@ -9,6 +9,10 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.interaction.exception.ApiError;
+import ru.practicum.interaction.exception.BadRequestException;
+import ru.practicum.interaction.exception.ConflictException;
+import ru.practicum.interaction.exception.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

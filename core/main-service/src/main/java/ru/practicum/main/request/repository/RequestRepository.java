@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
 
-    boolean existsByRequesterIdAndEventId(Long userId, Long eventId);
+    boolean existsByRequesterAndEventId(Long userId, Long eventId);
 
     long countByEventIdAndStatus(Long eventId, RequestStatus requestStatus);
 
-    List<Request> findAllByRequesterId(Long userId);
+    List<Request> findAllByRequester(Long userId);
 
     List<Request> findAllByEventIdAndStatus(Long eventId, RequestStatus requestStatus);
 

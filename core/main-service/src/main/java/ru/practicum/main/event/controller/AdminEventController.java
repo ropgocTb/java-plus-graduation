@@ -8,11 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.interaction.exception.BadRequestException;
 import ru.practicum.main.event.dto.EventFullDto;
 import ru.practicum.main.event.dto.SearchParamsAdmin;
 import ru.practicum.main.event.dto.UpdateEventAdminRequest;
 import ru.practicum.main.event.service.EventService;
-import ru.practicum.main.exception.BadRequestException;
 
 import java.time.LocalDateTime;
 import java.util.List;

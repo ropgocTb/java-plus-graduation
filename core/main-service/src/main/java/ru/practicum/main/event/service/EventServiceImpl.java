@@ -9,6 +9,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.interaction.contract.user.PublicUserClient;
+import ru.practicum.interaction.dto.user.UserDto;
+import ru.practicum.interaction.exception.BadRequestException;
+import ru.practicum.interaction.exception.ConflictException;
+import ru.practicum.interaction.exception.NotFoundException;
+import ru.practicum.interaction.util.PaginationUtil;
 import ru.practicum.main.category.model.Category;
 import ru.practicum.main.category.repository.CategoryRepository;
 import ru.practicum.main.event.dto.*;
@@ -16,17 +22,11 @@ import ru.practicum.main.event.mapper.EventMapper;
 import ru.practicum.main.event.model.Event;
 import ru.practicum.main.event.model.EventState;
 import ru.practicum.main.event.repository.EventRepository;
-import ru.practicum.main.exception.BadRequestException;
-import ru.practicum.main.exception.ConflictException;
-import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.request.dto.ParticipationRequestDto;
 import ru.practicum.main.request.mapper.RequestMapper;
 import ru.practicum.main.request.model.Request;
 import ru.practicum.main.request.model.RequestStatus;
 import ru.practicum.main.request.repository.RequestRepository;
-import ru.practicum.main.user.model.User;
-import ru.practicum.main.user.repository.UserRepository;
-import ru.practicum.main.util.PaginationUtil;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.StatRequestDto;
 import ru.practicum.stats.dto.StatResponseDto;
@@ -45,7 +45,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
     private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
+    private final PublicUserClient userClient;
     private final EventMapper eventMapper;
     private final RequestMapper requestMapper;
     private final StatsClient statsClient;
@@ -129,7 +129,7 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getUserEvents(Long userId, int from, int size) {
         Pageable pageRequest = PaginationUtil.createPageRequest(from, size);
 
-        List<Event> events = eventRepository.findAllByInitiator_Id(userId, pageRequest);
+        List<Event> events = eventRepository.findAllByInitiator(userId, pageRequest);
 
         enrichEvents(events);
 
@@ -150,7 +150,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getUserEvent(Long userId, Long eventId) {
-        Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
+        Event event = eventRepository.findByIdAndInitiator(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event with id " + eventId + " and initiator id " + userId +
                         " not found"));
 
@@ -165,8 +165,7 @@ public class EventServiceImpl implements EventService {
         Category category = categoryRepository.findById(newEventDto.getCategory())
                 .orElseThrow(() -> new NotFoundException("Category with id " + newEventDto.getCategory() + " not found"));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
+        UserDto user = userClient.getUserById(userId);
 
         if (!newEventDto.getEventDate().isAfter(LocalDateTime.now().plusHours(2)))
             throw new BadRequestException("Event date cannot be earlier than two hours from now");
@@ -183,7 +182,7 @@ public class EventServiceImpl implements EventService {
                 .category(category)
                 .createdOn(LocalDateTime.now())
                 .state(EventState.PENDING)
-                .initiator(user)
+                .initiator(user.getId())
                 .build();
 
         log.info("Creating event: {}", event);
@@ -259,12 +258,11 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = false)
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id " + userId + " not found"));
+        UserDto user = userClient.getUserById(userId);
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id " + eventId + " not found"));
 
-        if (!Objects.equals(event.getInitiator().getId(), user.getId()))
+        if (!Objects.equals(event.getInitiator(), user.getId()))
             throw new ConflictException("User cannot update event that is not initiated by them");
 
         if (event.getState().equals(EventState.PUBLISHED))
@@ -330,7 +328,7 @@ public class EventServiceImpl implements EventService {
                                                                 Long eventId,
                                                                 EventRequestStatusUpdateRequest dto) {
         // Проверка на User
-        if (!userRepository.existsById(userId)) {
+        if (!userClient.existsById(userId)) {
             throw new NotFoundException("User with id=" + userId + " not found");
         }
 
@@ -338,7 +336,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " not found"));
 
         // Проверка на Initiator
-        if (!event.getInitiator().getId().equals(userId)) {
+        if (!event.getInitiator().equals(userId)) {
             throw new ConflictException("User is not the initiator of the event");
         }
 
@@ -443,7 +441,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
-        if (!eventRepository.existsByIdAndInitiatorId(eventId, userId)) {
+        if (!eventRepository.existsByIdAndInitiator(eventId, userId)) {
             throw new ConflictException("User is not the initiator of the event");
         }
 

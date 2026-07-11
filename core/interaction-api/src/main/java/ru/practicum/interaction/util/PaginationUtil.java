@@ -1,0 +1,24 @@
+package ru.practicum.interaction.util;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+public class PaginationUtil {
+
+    public static Pageable createPageRequest(int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new IllegalArgumentException("Параметры пагинации некорректные");
+        }
+        int page = from / size;
+        return PageRequest.of(page, size, Sort.by("id").ascending());
+    }
+
+    public static Pageable createPageRequestSorted(int from, int size, Sort sort) {
+        if (from < 0 || size <= 0) {
+            throw new IllegalArgumentException("Параметры пагинации некорректные");
+        }
+        int page = from / size;
+        return PageRequest.of(page, size, sort);
+    }
+}

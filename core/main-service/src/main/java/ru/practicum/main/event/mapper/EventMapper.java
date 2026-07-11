@@ -2,11 +2,11 @@ package ru.practicum.main.event.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.practicum.interaction.dto.user.UserShortDto;
 import ru.practicum.main.category.mapper.CategoryMapper;
 import ru.practicum.main.event.dto.EventFullDto;
 import ru.practicum.main.event.dto.EventShortDto;
 import ru.practicum.main.event.model.Event;
-import ru.practicum.main.user.mapper.UserMapper;
 
 import java.util.List;
 
@@ -15,9 +15,12 @@ import java.util.List;
 public class EventMapper {
 
     private final CategoryMapper categoryMapper;
-    private final UserMapper userMapper;
 
     public EventShortDto mapToEventShortDto(Event event) {
+        UserShortDto userShortDto = UserShortDto.builder()
+                .id(event.getInitiator())
+                .build();
+
         return EventShortDto.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -25,13 +28,17 @@ public class EventMapper {
                 .category(categoryMapper.mapToResponseDto(event.getCategory()))
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate())
-                .initiator(userMapper.mapToUserShortDto(event.getInitiator()))
+                .initiator(userShortDto)
                 .views(event.getViews())
                 .confirmedRequests(event.getConfirmedRequests())
                 .build();
     }
 
     public EventFullDto mapToEventFullDto(Event event) {
+        UserShortDto userShortDto = UserShortDto.builder()
+                .id(event.getInitiator())
+                .build();
+
         return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -39,7 +46,7 @@ public class EventMapper {
                 .category(categoryMapper.mapToResponseDto(event.getCategory()))
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate())
-                .initiator(userMapper.mapToUserShortDto(event.getInitiator()))
+                .initiator(userShortDto)
                 .description(event.getDescription())
                 .participantLimit(event.getParticipantLimit())
                 .state(event.getState())

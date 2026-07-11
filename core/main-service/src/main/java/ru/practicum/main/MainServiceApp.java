@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "ru.practicum")
-@EnableFeignClients(basePackages = "ru.practicum.stats.client")
+@EnableFeignClients(basePackages = "ru.practicum")
 public class MainServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(MainServiceApp.class, args);

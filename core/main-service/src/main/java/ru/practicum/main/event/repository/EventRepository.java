@@ -65,7 +65,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
         static Specification<Event> inInitiators(List<Long> users) {
             return ((root, query, criteriaBuilder)
-                    -> root.get(Event_.initiator).get(User_.id).in(users));
+                    -> root.get(Event_.initiator).in(users));
         }
 
         static Specification<Event> onlyAvailable() {
@@ -84,13 +84,13 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     Optional<Event> findByIdAndStateIs(Long eventId, EventState state);
 
-    List<Event> findAllByInitiator_Id(Long userId, Pageable pageable);
+    List<Event> findAllByInitiator(Long userId, Pageable pageable);
 
-    Optional<Event> findByIdAndInitiator_Id(Long eventId, Long userId);
+    Optional<Event> findByIdAndInitiator(Long eventId, Long userId);
 
     boolean existsByCategory_Id(Long categoryId);
 
-    boolean existsByIdAndInitiatorId(Long eventId, Long userId);
+    boolean existsByIdAndInitiator(Long eventId, Long userId);
 
     List<Event> findAllByIdIn(Set<Long> eventsId);
 }
