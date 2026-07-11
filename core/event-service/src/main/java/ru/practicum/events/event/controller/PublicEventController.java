@@ -1,5 +1,6 @@
 package ru.practicum.events.event.controller;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -66,6 +67,7 @@ public class PublicEventController implements PublicEventOperations {
     }
 
     @Override
+    @Retry(name = "retryGet")
     public EventFullDto getEvent(@PathVariable Long id, HttpServletRequest request) {
         log.info("Getting event: id={}", id);
         return eventService.getEvent(id, request);

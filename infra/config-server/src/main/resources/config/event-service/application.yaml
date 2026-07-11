@@ -14,3 +14,18 @@ spring:
 
 app:
   name: ewm-main-service
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      DemoClientgetDemo:
+        minimumNumberOfCalls: 69
+  timelimiter:
+    instances:
+      DemoClientgetDemo:
+        timeoutDuration: 10s
+  retry:
+    instances:
+      retryGet:
+        max-attempts: 3
+        wait-duration: 1s
