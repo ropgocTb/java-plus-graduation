@@ -38,3 +38,13 @@ services:
       - POSTGRES_DB=subs_db
       - POSTGRES_USER=subs_db
       - POSTGRES_PASSWORD=12345
+
+  request-db:
+    image: postgres:16.1
+    container_name: requests-db
+    ports:
+      - "6545:5432"
+    environment:
+      - POSTGRES_DB=request_db
+      - POSTGRES_USER=request_db
+      - POSTGRES_PASSWORD=12345

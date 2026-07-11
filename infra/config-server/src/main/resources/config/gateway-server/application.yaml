@@ -10,20 +10,15 @@ spring:
           predicates:
             - Path=/subscriptions/**, /users/*/subscriptions/**, /users/*/subscriptions/*
 
-        - id: categories-service-route
-          uri: lb://main-service
-          predicates:
-            - Path=/admin/categories/**, /categories/**
-
         - id: request-service-route
-          uri: lb://main-service
+          uri: lb://request-service
           predicates:
-            - Path=/users/*/requests/**, /users/*/events/*/requests/**, /users/events/*/requests/count, /users/events/requests/count
+            - Path=/users/*/requests/**, /users/*/events/*/requests/**, /users/events/requests/confirmed, /users/events/*/requests/confirmed
 
         - id: event-service-route
-          uri: lb://main-service
+          uri: lb://event-service
           predicates:
-            - Path=/users/*/events/**, /admin/events/**, /admin/compilations/**, /compilations/**, /events/**, /internal/events/**
+            - Path=/users/*/events/**, /admin/events/**, /admin/compilations/**, /compilations/**, /events/**, /internal/events/**, /admin/categories/**, /categories/**
 
         - id: user-service-route
           uri: lb://user-service

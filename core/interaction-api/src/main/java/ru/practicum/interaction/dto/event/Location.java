@@ -1,5 +1,6 @@
-package ru.practicum.interaction.dto.user;
+package ru.practicum.interaction.dto.event;
 
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,11 +8,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class Location {
 
-    private Long id;
-    private String email;
-    private String name;
+    private double lat;
+    private double lon;
 }

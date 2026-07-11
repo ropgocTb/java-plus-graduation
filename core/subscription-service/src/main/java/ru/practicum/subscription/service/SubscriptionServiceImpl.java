@@ -22,30 +22,22 @@ import java.util.List;
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
-    private final PublicUserClient publicUserClient;
+    private final PublicUserClient userClient;
 
     @Override
     @Transactional
     public void follow(Long userId, Long targetUserId) {
 
         if (userId.equals(targetUserId)) throw new BadRequestException("User cannot follow himself");
-
-        UserDto follower;
-        UserDto followed;
-
-        try {
-            follower = publicUserClient.getUserById(userId);
-            followed = publicUserClient.getUserById(targetUserId);
-        } catch (FeignException.NotFound e) {
-            throw new NotFoundException("User not Found");
-        }
+        if (!userClient.existsById(userId)) throw new NotFoundException("User not found " + userId);
+        if (!userClient.existsById(targetUserId)) throw new NotFoundException("User not found " + targetUserId);
 
         boolean alreadyExists = subscriptionRepository.existsByFollowerAndFollowed(userId, targetUserId);
         if (alreadyExists) throw new ConflictException("User already subscribed to this user");
 
         Subscription subscription = Subscription.builder()
-                .follower(follower.getId())
-                .followed(followed.getId())
+                .follower(userId)
+                .followed(targetUserId)
                 .created(LocalDateTime.now())
                 .build();
         subscriptionRepository.save(subscription);
