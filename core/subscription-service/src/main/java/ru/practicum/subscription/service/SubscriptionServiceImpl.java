@@ -1,12 +1,10 @@
 package ru.practicum.subscription.service;
 
-import feign.FeignException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.interaction.contract.user.PublicUserClient;
-import ru.practicum.interaction.dto.user.UserDto;
 import ru.practicum.interaction.exception.BadRequestException;
 import ru.practicum.interaction.exception.ConflictException;
 import ru.practicum.interaction.exception.NotFoundException;

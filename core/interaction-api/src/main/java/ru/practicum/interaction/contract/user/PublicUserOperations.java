@@ -14,13 +14,13 @@ public interface PublicUserOperations {
 
     @GetMapping("/{userId}/followers")
     List<UserShortDto> getUserFollowers(@PathVariable @Positive Long userId,
-                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                               @RequestParam(defaultValue = "10") @Positive int size);
+                                        @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                        @RequestParam(defaultValue = "10") @Positive int size);
 
     @GetMapping("/{userId}/following")
     List<UserShortDto> getUserFollowing(@PathVariable @Positive Long userId,
-                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                               @RequestParam(defaultValue = "10") @Positive int size);
+                                        @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                        @RequestParam(defaultValue = "10") @Positive int size);
 
     @GetMapping("/{userId}")
     UserDto getUserById(@PathVariable @Positive Long userId);
