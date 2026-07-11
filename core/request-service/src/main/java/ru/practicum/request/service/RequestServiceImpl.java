@@ -1,9 +1,9 @@
 package ru.practicum.request.service;
 
 import feign.FeignException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.interaction.contract.event.PublicEventClient;
 import ru.practicum.interaction.contract.user.PublicUserClient;
 import ru.practicum.interaction.dto.event.EventFullDto;
@@ -99,6 +99,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request with id=" + requestId + " not found"));
@@ -111,11 +112,11 @@ public class RequestServiceImpl implements RequestService {
         }
 
         request.setStatus(RequestStatus.CANCELED);
-        return requestMapper.mapToParticipationRequestDto(request);
+        return requestMapper.mapToParticipationRequestDto(requestRepository.save(request));
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional(readOnly = false)
+    @Transactional(readOnly = false)
     public EventRequestStatusUpdateResult updateRequestStatuses(Long userId,
                                                                 Long eventId,
                                                                 EventRequestStatusUpdateRequest dto) {

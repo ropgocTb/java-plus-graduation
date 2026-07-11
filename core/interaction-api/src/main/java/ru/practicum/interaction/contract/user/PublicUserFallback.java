@@ -1,10 +1,12 @@
 package ru.practicum.interaction.contract.user;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.interaction.dto.user.UserDto;
 import ru.practicum.interaction.dto.user.UserShortDto;
 
 import java.util.List;
 
+@Component
 public class PublicUserFallback implements PublicUserClient {
     @Override
     public List<UserShortDto> getUserFollowers(Long userId, int from, int size) {

@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.events.event.dto.SearchParams;
 import ru.practicum.events.event.service.EventService;
 import ru.practicum.interaction.contract.event.PublicEventOperations;
@@ -32,7 +29,7 @@ public class PublicEventController implements PublicEventOperations {
 
     private final EventService eventService;
 
-    @Override
+    @GetMapping
     public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
                                          @RequestParam(required = false) List<Long> categories,
                                          @RequestParam(required = false) Boolean paid,
@@ -66,7 +63,7 @@ public class PublicEventController implements PublicEventOperations {
         return eventService.getEvents(searchParams, request);
     }
 
-    @Override
+    @GetMapping("/{id}")
     @Retry(name = "retryGet")
     public EventFullDto getEvent(@PathVariable Long id, HttpServletRequest request) {
         log.info("Getting event: id={}", id);

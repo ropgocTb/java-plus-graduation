@@ -1,11 +1,13 @@
 package ru.practicum.interaction.contract.request;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.interaction.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.interaction.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.interaction.dto.request.ParticipationRequestDto;
 
 import java.util.List;
 
+@Component
 public class RequestFallback implements RequestClient {
     @Override
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
