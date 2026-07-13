@@ -5,30 +5,25 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: main-service-admin
-          uri: lb://main-service
+        - id: subscription-service-route
+          uri: lb://subscription-service
           predicates:
-            - Path=/admin/**
+            - Path=/subscriptions/**, /users/*/subscriptions/**, /users/*/subscriptions/*
 
-        - id: main-service-public-categories
-          uri: lb://main-service
+        - id: request-service-route
+          uri: lb://request-service
           predicates:
-            - Path=/categories/**
+            - Path=/users/*/requests/**, /users/*/events/*/requests/**, /users/events/requests/confirmed, /users/events/*/requests/confirmed
 
-        - id: main-service-public-compilations
-          uri: lb://main-service
+        - id: event-service-route
+          uri: lb://event-service
           predicates:
-            - Path=/compilations/**
+            - Path=/users/*/events/**, /admin/events/**, /admin/compilations/**, /compilations/**, /events/**, /internal/events/**, /admin/categories/**, /categories/**
 
-        - id: main-service-public-events
-          uri: lb://main-service
+        - id: user-service-route
+          uri: lb://user-service
           predicates:
-            - Path=/events/**
-
-        - id: main-service-private-users
-          uri: lb://main-service
-          predicates:
-            - Path=/users/**
+            - Path=/users/**,/admin/users/**
 
         - id: stats-server
           uri: lb://stats-server

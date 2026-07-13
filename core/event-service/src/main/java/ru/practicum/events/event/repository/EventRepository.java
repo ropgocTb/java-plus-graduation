@@ -1,0 +1,77 @@
+package ru.practicum.events.event.repository;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
+import ru.practicum.events.event.model.Event;
+import ru.practicum.interaction.dto.event.EventState;
+import ru.practicum.events.category.model.Category_;
+import ru.practicum.events.event.model.Event_;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+@Repository
+public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
+
+    interface Specs {
+        static Specification<Event> byAnnotationOrDescription(String text) {
+            String searchText = text.toLowerCase();
+            return (root, query, criteriaBuilder) -> criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.annotation)), "%" + searchText + "%"),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get(Event_.description)), "%" + searchText + "%")
+            );
+        }
+
+        static Specification<Event> inCategories(List<Long> categories) {
+            return (root, query, criteriaBuilder) ->
+                    root.get(Event_.category).get(Category_.id).in(categories);
+        }
+
+        static Specification<Event> byPaid(Boolean paid) {
+            return (root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get(Event_.paid), paid);
+        }
+
+        static Specification<Event> betweenTime(LocalDateTime startTime, LocalDateTime endTime) {
+            return (root, query, criteriaBuilder) ->
+                    criteriaBuilder.between(root.get(Event_.eventDate), startTime, endTime);
+        }
+
+        static Specification<Event> afterNow() {
+            return (root, query, criteriaBuilder) ->
+                    criteriaBuilder.greaterThanOrEqualTo(root.get(Event_.eventDate), LocalDateTime.now());
+        }
+
+        static Specification<Event> byState(EventState state) {
+            return (root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get(Event_.state), state);
+        }
+
+        static Specification<Event> inStates(List<String> states) {
+            return (root, query, criteriaBuilder) ->
+                    root.get(Event_.state).in(states);
+        }
+
+        static Specification<Event> inInitiators(List<Long> users) {
+            return ((root, query, criteriaBuilder)
+                    -> root.get(Event_.initiator).in(users));
+        }
+    }
+
+    Optional<Event> findByIdAndStateIs(Long eventId, EventState state);
+
+    List<Event> findAllByInitiator(Long userId, Pageable pageable);
+
+    Optional<Event> findByIdAndInitiator(Long eventId, Long userId);
+
+    boolean existsByCategory_Id(Long categoryId);
+
+    boolean existsByIdAndInitiator(Long eventId, Long userId);
+
+    List<Event> findAllByIdIn(Set<Long> eventsId);
+}
