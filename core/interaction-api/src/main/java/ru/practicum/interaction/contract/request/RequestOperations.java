@@ -35,4 +35,7 @@ public interface RequestOperations {
 
     @GetMapping("/events/requests/confirmed")
     List<ParticipationRequestDto> getConfirmedRequestsForEvents(@RequestParam List<Long> eventIds);
+
+    @GetMapping("/{userId}/events/{eventId}/confirmed")
+    boolean hasConfirmedRequest(@PathVariable Long userId, @PathVariable Long eventId);
 }

@@ -71,4 +71,10 @@ public class PrivateRequestController implements RequestOperations {
         log.info("Getting confirmed event requests: eventsId={}", eventIds);
         return requestService.getConfirmedRequestsForEvents(eventIds);
     }
+
+    @Override
+    public boolean hasConfirmedRequest(@PathVariable Long userId, @PathVariable Long eventId) {
+        log.info("Getting confirmed request: userId={}, eventId={}", userId, eventId);
+        return requestService.hasConfirmedRequest(userId, eventId);
+    }
 }

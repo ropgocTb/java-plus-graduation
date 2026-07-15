@@ -17,19 +17,33 @@ import ru.practicum.interaction.exception.NotFoundException;
 import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.repository.RequestRepository;
+import ru.practicum.stats.client.StatsCollectorClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
 
     private final RequestMapper requestMapper;
     private final RequestRepository requestRepository;
     private final PublicUserClient userClient;
     private final PublicEventClient eventClient;
+
+    private final StatsCollectorClient collectorClient;
+
+    public RequestServiceImpl(RequestMapper requestMapper,
+                              RequestRepository requestRepository,
+                              PublicUserClient userClient,
+                              PublicEventClient eventClient,
+                              StatsCollectorClient collectorClient) {
+        this.requestMapper = requestMapper;
+        this.requestRepository = requestRepository;
+        this.userClient = userClient;
+        this.eventClient = eventClient;
+        this.collectorClient = collectorClient;
+    }
 
     @Override
     @Transactional
@@ -84,6 +98,8 @@ public class RequestServiceImpl implements RequestService {
                 .build();
 
         Request saved = requestRepository.save(request);
+
+        collectorClient.sendRegister(saved.getRequester(), saved.getEvent());
 
         return requestMapper.mapToParticipationRequestDto(saved);
     }
@@ -257,5 +273,10 @@ public class RequestServiceImpl implements RequestService {
     public List<ParticipationRequestDto> getConfirmedRequestsForEvents(List<Long> eventIds) {
         List<Request> confirmedRequests = requestRepository.findAllByEventInAndStatus(eventIds, RequestStatus.CONFIRMED);
         return requestMapper.mapToListParticipationRequestDto(confirmedRequests);
+    }
+
+    @Override
+    public boolean hasConfirmedRequest(Long userId, Long eventId) {
+        return requestRepository.existsByRequesterAndEvent(userId, eventId);
     }
 }

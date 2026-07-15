@@ -37,6 +37,6 @@ public class EventFullDto {
 
     private Location location;
     private Boolean requestModeration;
-    private long views;
+    private double rating;
     private int confirmedRequests;
 }

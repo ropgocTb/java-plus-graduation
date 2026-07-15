@@ -1,3 +1,9 @@
+grpc:
+  client:
+    collector:
+      address: 'discovery:///collector'
+      negotiation-type: plaintext
+
 server:
   port: 0
 

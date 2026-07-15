@@ -29,7 +29,7 @@ public class EventMapper {
                 .paid(event.getPaid())
                 .eventDate(event.getEventDate())
                 .initiator(userShortDto)
-                .views(event.getViews())
+                .rating(event.getRating())
                 .confirmedRequests(event.getConfirmedRequests())
                 .build();
     }
@@ -54,7 +54,7 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .location(event.getLocation())
                 .requestModeration(event.getRequestedModeration())
-                .views(event.getViews())
+                .rating(event.getRating())
                 .confirmedRequests(event.getConfirmedRequests())
                 .build();
     }

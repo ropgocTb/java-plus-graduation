@@ -66,7 +66,7 @@ public class Event {
     private Boolean requestedModeration;
 
     @Transient
-    private long views;
+    private double rating;
 
     @Transient
     private int confirmedRequests;

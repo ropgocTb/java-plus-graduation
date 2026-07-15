@@ -43,4 +43,9 @@ public class RequestFallback implements RequestClient {
     public List<ParticipationRequestDto> getConfirmedRequestsForEvents(List<Long> eventIds) {
         throw new RuntimeException("Request service is unavailable");
     }
+
+    @Override
+    public boolean hasConfirmedRequest(Long userId, Long eventId) {
+        return false;
+    }
 }
