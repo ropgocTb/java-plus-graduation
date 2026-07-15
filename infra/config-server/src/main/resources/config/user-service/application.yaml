@@ -11,3 +11,9 @@ spring:
     url: jdbc:postgresql://localhost:6543/users_db
     username: users_db
     password: 12345
+
+grpc:
+  client:
+    collector-service:
+      address: discovery:///collector-service
+      negotiationType: plaintext
