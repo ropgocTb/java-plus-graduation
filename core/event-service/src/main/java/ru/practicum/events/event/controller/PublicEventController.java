@@ -70,7 +70,7 @@ public class PublicEventController implements PublicEventOperations {
 
     @GetMapping("/recommendations")
     public List<EventShortDto> getRecommendations(@RequestHeader("X-EWM-USER-ID") Long userId,
-                                                  @RequestParam(defaultValue = "10") Integer size){
+                                                  @RequestParam(defaultValue = "10") Integer size) {
         log.info("Getting recommendations for user {}", userId);
         return eventService.getRecommendations(userId, size);
     }

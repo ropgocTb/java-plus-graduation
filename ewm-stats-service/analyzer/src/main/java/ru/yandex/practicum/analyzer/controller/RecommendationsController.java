@@ -20,11 +20,11 @@ public class RecommendationsController extends RecommendationsControllerGrpc.Rec
         try {
             service.getRecommendations(request.getUserId(), request.getMaxResults())
                     .forEach(entry -> response.onNext(
-                    RecommendedEventProto.newBuilder()
-                            .setEventId(entry.getKey())
-                            .setScore(entry.getValue())
-                            .build()
-            ));
+                            RecommendedEventProto.newBuilder()
+                                    .setEventId(entry.getKey())
+                                    .setScore(entry.getValue())
+                                    .build()
+                    ));
 
             response.onCompleted();
         } catch (Exception ex) {
@@ -42,11 +42,11 @@ public class RecommendationsController extends RecommendationsControllerGrpc.Rec
         try {
             service.getSimilarEvents(request.getEventId(), request.getUserId(), request.getMaxResults())
                     .forEach(entry -> response.onNext(
-                    RecommendedEventProto.newBuilder()
-                            .setEventId(entry.getKey())
-                            .setScore(entry.getValue())
-                            .build()
-            ));
+                            RecommendedEventProto.newBuilder()
+                                    .setEventId(entry.getKey())
+                                    .setScore(entry.getValue())
+                                    .build()
+                    ));
             response.onCompleted();
         } catch (Exception ex) {
             response.onError(new StatusRuntimeException(
@@ -62,10 +62,10 @@ public class RecommendationsController extends RecommendationsControllerGrpc.Rec
                                      StreamObserver<RecommendedEventProto> response) {
         try {
             service.getInteractionsCount(request.getEventIdsList()).forEach((eventId, score) ->
-                response.onNext(RecommendedEventProto.newBuilder()
-                                .setEventId(eventId)
-                                .setScore(score)
-                                .build())
+                    response.onNext(RecommendedEventProto.newBuilder()
+                            .setEventId(eventId)
+                            .setScore(score)
+                            .build())
             );
             response.onCompleted();
         } catch (Exception ex) {

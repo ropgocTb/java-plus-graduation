@@ -73,7 +73,7 @@ public class RecommendationsService {
         interactionRepository.save(interaction);
     }
 
-    public List<Map.Entry<Long,Double>> getRecommendations(long userId, int maxResults) {
+    public List<Map.Entry<Long, Double>> getRecommendations(long userId, int maxResults) {
         List<Interaction> recent = interactionRepository.findAllByUserIdOrderByTimestampDesc(userId);
 
         if (recent.isEmpty()) return List.of();
@@ -96,13 +96,13 @@ public class RecommendationsService {
                         ? s.getEventB()
                         : s.getEventA();
 
-                if(!watched.contains(event)) candidates.add(event);
+                if (!watched.contains(event)) candidates.add(event);
             });
         }
 
         return candidates.stream()
                 .map(event -> Map.entry(event, predict(userId, event)))
-                .sorted(Map.Entry.<Long,Double> comparingByValue().reversed())
+                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
                 .limit(maxResults)
                 .toList();
     }
@@ -113,7 +113,7 @@ public class RecommendationsService {
 
         for (Interaction interaction : userRatings) {
             Similarity similarity = getSimilarity(interaction.getEventId(), targetEvent);
-            if(similarity!=null) neighbours.add(new Neighbour(interaction.getRating(), similarity.getSimilarity()));
+            if (similarity != null) neighbours.add(new Neighbour(interaction.getRating(), similarity.getSimilarity()));
         }
 
         neighbours.sort(Comparator.comparing(Neighbour::similarity).reversed());
@@ -133,12 +133,13 @@ public class RecommendationsService {
         return numerator / denominator;
     }
 
-    private Similarity getSimilarity(long first, long second){
-        return similarityRepository.findByEventAAndEventB(Math.min(first,second), Math.max(first,second))
+    private Similarity getSimilarity(long first, long second) {
+        return similarityRepository.findByEventAAndEventB(Math.min(first, second), Math.max(first, second))
                 .orElse(null);
     }
 
-    private record Neighbour(double rating, double similarity) {}
+    private record Neighbour(double rating, double similarity) {
+    }
 
     public List<Map.Entry<Long, Double>> getSimilarEvents(long eventId, long userId, int maxResults) {
         Set<Long> viewedEvents = interactionRepository.findAllByUserId(userId)
@@ -149,12 +150,12 @@ public class RecommendationsService {
         return similarityRepository.findAllByEventAOrEventB(eventId, eventId).stream()
                 .map(s -> Map.entry(getEventOrder(s, eventId), s.getSimilarity()))
                 .filter(e -> !viewedEvents.contains(e.getKey()))
-                .sorted(Map.Entry.<Long,Double> comparingByValue() .reversed())
+                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
                 .limit(maxResults)
                 .toList();
     }
 
-    private long getEventOrder(Similarity similarity, long eventId){
+    private long getEventOrder(Similarity similarity, long eventId) {
         return similarity.getEventA() == eventId ? similarity.getEventB() : similarity.getEventA();
     }
 
