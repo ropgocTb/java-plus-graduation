@@ -35,16 +35,14 @@ public class SimilarityStarter {
             while (!Thread.currentThread().isInterrupted()) {
                 ConsumerRecords<String, EventSimilarityAvro> records = consumer.poll(Duration.ofMillis(1000));
 
-                for (ConsumerRecord<String, EventSimilarityAvro> record : records) {
-                    try {
+                try {
+                    for (ConsumerRecord<String, EventSimilarityAvro> record : records) {
                         service.saveSimilarity(record.value());
-                        consumer.commitAsync();
-                    } catch (Exception e) {
-                        log.error("Ошибка во время сохранения похожести событий {} {}", record.value().getEventA(),
-                                record.value().getEventB());
                     }
+                    consumer.commitAsync();
+                } catch (Exception e) {
+                    log.error("Ошибка во время обработки событий", e);
                 }
-
             }
         } catch (WakeupException ignored) {
 

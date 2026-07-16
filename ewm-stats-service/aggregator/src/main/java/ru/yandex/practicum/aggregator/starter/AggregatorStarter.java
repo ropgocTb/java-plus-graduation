@@ -35,16 +35,14 @@ public class AggregatorStarter {
             while (!Thread.currentThread().isInterrupted()) {
                 ConsumerRecords<String, UserActionAvro> records = consumer.poll(Duration.ofMillis(1000));
 
-                for (ConsumerRecord<String, UserActionAvro> record : records) {
-                    try {
+                try {
+                    for (ConsumerRecord<String, UserActionAvro> record : records) {
                         aggregator.processAction(record.value());
-                        consumer.commitAsync();
-                    } catch (Exception e) {
-                        log.error("Ошибка во время обработки события uid={} eid={}", record.value().getUserId(),
-                                record.value().getEventId());
                     }
+                    consumer.commitAsync();
+                } catch (Exception e) {
+                    log.error("Ошибка во время обработки событий", e);
                 }
-
             }
         } catch (WakeupException ignored) {
 
