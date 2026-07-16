@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
@@ -100,7 +101,11 @@ public class UserActionAggregator {
                 .build();
 
         log.info("Sending similarity for eventA: {}", result.getEventA());
-        producer.send(new ProducerRecord<>(producerTopic, String.valueOf(result.getEventA()), result));
+        try {
+            producer.send(new ProducerRecord<>(producerTopic, String.valueOf(result.getEventA()), result)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Similarity publish failed");
+        }
     }
 
     private double getWeight(ActionTypeAvro type) {
