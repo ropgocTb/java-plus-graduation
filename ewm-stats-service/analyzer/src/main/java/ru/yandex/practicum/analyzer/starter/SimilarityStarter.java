@@ -36,7 +36,12 @@ public class SimilarityStarter {
                 ConsumerRecords<String, EventSimilarityAvro> records = consumer.poll(Duration.ofMillis(1000));
 
                 for (ConsumerRecord<String, EventSimilarityAvro> record : records) {
-                    service.saveSimilarity(record.value());
+                    try {
+                        service.saveSimilarity(record.value());
+                    } catch (Exception e) {
+                        log.error("Ошибка во время сохранения похожести событий {} {}", record.value().getEventA(),
+                                record.value().getEventB());
+                    }
                 }
 
                 consumer.commitAsync();

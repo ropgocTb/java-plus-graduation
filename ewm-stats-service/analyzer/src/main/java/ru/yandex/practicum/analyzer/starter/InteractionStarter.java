@@ -36,7 +36,12 @@ public class InteractionStarter implements Runnable {
                 ConsumerRecords<String, UserActionAvro> records = consumer.poll(Duration.ofMillis(1000));
 
                 for (ConsumerRecord<String, UserActionAvro> record : records) {
-                    service.saveInteraction(record.value());
+                    try {
+                        service.saveInteraction(record.value());
+                    } catch (Exception e) {
+                        log.error("Ошибка во время сохранения взаимодействия  ui={} ei={}", record.value().getUserId(),
+                                record.value().getEventId());
+                    }
                 }
 
                 consumer.commitAsync();

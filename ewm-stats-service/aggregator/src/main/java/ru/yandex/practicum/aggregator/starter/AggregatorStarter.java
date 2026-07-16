@@ -36,7 +36,12 @@ public class AggregatorStarter {
                 ConsumerRecords<String, UserActionAvro> records = consumer.poll(Duration.ofMillis(1000));
 
                 for (ConsumerRecord<String, UserActionAvro> record : records) {
-                    aggregator.processAction(record.value());
+                    try {
+                        aggregator.processAction(record.value());
+                    } catch (Exception e) {
+                        log.error("Ошибка во время обработки события uid={} eid={}", record.value().getUserId(),
+                                record.value().getEventId());
+                    }
                 }
 
                 consumer.commitAsync();
