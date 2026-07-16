@@ -1,7 +1,6 @@
 package ru.yandex.practicum.aggregator.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,15 +13,12 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
 public class UserActionAggregator {
 
     private final String producerTopic;
-
-    private final Producer<String, SpecificRecordBase> producer;
 
     private final Map<Long, Map<Long, Double>> eventWeights = new HashMap<>();
     private final Map<Long, Double> eventSums = new HashMap<>();
@@ -33,13 +29,11 @@ public class UserActionAggregator {
     private static final double LIKE_WEIGHT = 1.0;
     private static final double DEFAULT_VALUE = 0.0;
 
-    public UserActionAggregator(@Value("${stats.events-similarity.topic}") String producerTopic,
-                                Producer<String, SpecificRecordBase> producer) {
+    public UserActionAggregator(@Value("${stats.events-similarity.topic}") String producerTopic) {
         this.producerTopic = producerTopic;
-        this.producer = producer;
     }
 
-    public void processAction(UserActionAvro userActionAvro) {
+    public void processAction(UserActionAvro userActionAvro, Producer<String, EventSimilarityAvro> producer) {
         long eventId = userActionAvro.getEventId();
         long userId = userActionAvro.getUserId();
         double weight = getWeight(userActionAvro.getActionType());
@@ -51,7 +45,7 @@ public class UserActionAggregator {
 
         users.put(userId, weight);
         updateEventSum(eventId, oldWeight, weight);
-        recalculate(eventId, userId, oldWeight, weight, userActionAvro.getTimestamp());
+        recalculate(eventId, userId, oldWeight, weight, userActionAvro.getTimestamp(), producer);
     }
 
     private void updateEventSum(long eventId, Double oldWeight, double newWeight) {
@@ -59,7 +53,9 @@ public class UserActionAggregator {
         eventSums.merge(eventId, delta, Double::sum);
     }
 
-    private void recalculate(long changedEvent, long userId, Double oldWeight, double newWeight, Instant timestamp) {
+    private void recalculate(long changedEvent, long userId,
+                             Double oldWeight, double newWeight,
+                             Instant timestamp, Producer<String, EventSimilarityAvro> producer) {
         for (Map.Entry<Long, Map<Long, Double>> entry : eventWeights.entrySet()) {
             long anotherEvent = entry.getKey();
             if (anotherEvent == changedEvent) continue;
@@ -68,7 +64,7 @@ public class UserActionAggregator {
             if (anotherWeight == null) continue;
 
             updateMinSum(changedEvent, anotherEvent, oldWeight, newWeight, anotherWeight);
-            sendSimilarity(changedEvent, anotherEvent, timestamp);
+            sendSimilarity(changedEvent, anotherEvent, timestamp, producer);
         }
     }
 
@@ -83,7 +79,8 @@ public class UserActionAggregator {
                 .merge(second, delta, Double::sum);
     }
 
-    public void sendSimilarity(long eventA, long eventB, Instant timestamp) {
+    public void sendSimilarity(long eventA, long eventB, Instant timestamp,
+                               Producer<String, EventSimilarityAvro> producer) {
         long first = Math.min(eventA, eventB);
         long second = Math.max(eventA, eventB);
         double sMin = minWeightsSums.getOrDefault(first, Map.of()).getOrDefault(second, DEFAULT_VALUE);
@@ -101,11 +98,7 @@ public class UserActionAggregator {
                 .build();
 
         log.info("Sending similarity for eventA: {}", result.getEventA());
-        try {
-            producer.send(new ProducerRecord<>(producerTopic, String.valueOf(result.getEventA()), result)).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException("Similarity publish failed");
-        }
+        producer.send(new ProducerRecord<>(producerTopic, String.valueOf(result.getEventA()), result));
     }
 
     private double getWeight(ActionTypeAvro type) {

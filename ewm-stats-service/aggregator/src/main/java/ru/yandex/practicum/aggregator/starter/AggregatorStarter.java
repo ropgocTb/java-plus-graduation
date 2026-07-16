@@ -5,9 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 import ru.yandex.practicum.aggregator.service.UserActionAggregator;
 
@@ -23,6 +25,7 @@ public class AggregatorStarter {
     private String consumerTopic;
 
     private final Consumer<String, UserActionAvro> consumer;
+    private final Producer<String, EventSimilarityAvro> producer;
     private final UserActionAggregator aggregator;
 
     public void start() {
@@ -37,9 +40,10 @@ public class AggregatorStarter {
 
                 try {
                     for (ConsumerRecord<String, UserActionAvro> record : records) {
-                        aggregator.processAction(record.value());
+                        aggregator.processAction(record.value(), producer);
                     }
-                    consumer.commitAsync();
+                    producer.flush();
+                    consumer.commitSync();
                 } catch (Exception e) {
                     log.error("Ошибка во время обработки событий", e);
                 }
@@ -50,8 +54,10 @@ public class AggregatorStarter {
             log.error("Ошибка во время обработки событий", ex);
         } finally {
             try {
+                producer.flush();
                 consumer.commitSync();
             } finally {
+                producer.close();
                 consumer.close();
             }
         }

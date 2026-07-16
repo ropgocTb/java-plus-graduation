@@ -40,7 +40,6 @@ public class InteractionStarter implements Runnable {
                         service.saveInteraction(record.value());
                     }
                     consumer.commitAsync();
-
                 } catch (Exception e) {
                     log.error("Ошибка во время обработки событий", e);
                 }

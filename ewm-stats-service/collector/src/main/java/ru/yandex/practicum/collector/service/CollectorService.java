@@ -1,7 +1,6 @@
 package ru.yandex.practicum.collector.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 import ru.yandex.practicum.collector.mapper.CollectorMapper;
@@ -10,9 +9,6 @@ import stats.service.collector.UserActionProto;
 @Service
 @Slf4j
 public class CollectorService {
-
-    @Value("stats.user-actions.topic")
-    private String topic;
 
     private final KafkaProducer kafkaProducer;
     private final CollectorMapper collectorMapper;

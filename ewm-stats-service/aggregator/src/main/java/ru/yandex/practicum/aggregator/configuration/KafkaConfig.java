@@ -1,6 +1,5 @@
 package ru.yandex.practicum.aggregator.configuration;
 
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -9,6 +8,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 
 import java.util.Properties;
@@ -44,7 +44,7 @@ public class KafkaConfig {
     private String autoOffset;
 
     @Bean
-    public Producer<String, SpecificRecordBase> getProducer() {
+    public Producer<String, EventSimilarityAvro> getProducer() {
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, server);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
