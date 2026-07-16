@@ -1,0 +1,28 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      client-id: aggregator-service-client
+      group-id: aggregator-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: ru.yandex.practicum.stats.avro.deserializer.UserActionDeserializer
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: ru.yandex.practicum.stats.avro.serializer.GeneralAvroSerializer
+    properties:
+      linger:
+        ms: 5
+      acks: all
+      batch:
+        size: 16384
+      buffer:
+        memory: 33554432
+
+
+stats:
+  user-actions:
+    topic: stats.user-actions.v1
+  events-similarity:
+    topic: stats.events-similarity.v1

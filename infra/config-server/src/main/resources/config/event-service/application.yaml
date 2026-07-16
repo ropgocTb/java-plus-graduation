@@ -1,3 +1,12 @@
+grpc:
+  client:
+    collector:
+      address: 'discovery:///collector'
+      negotiation-type: plaintext
+    analyzer:
+      address: 'discovery:///analyzer'
+      negotiation-type: plaintext
+
 server:
   port: 0
 

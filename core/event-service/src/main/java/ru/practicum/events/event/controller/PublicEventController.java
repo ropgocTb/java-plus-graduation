@@ -1,7 +1,6 @@
 package ru.practicum.events.event.controller;
 
 import io.github.resilience4j.retry.annotation.Retry;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +39,7 @@ public class PublicEventController implements PublicEventOperations {
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                          @RequestParam(required = false) String sort,
                                          @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                         @RequestParam(defaultValue = "10") @Positive int size,
-                                         HttpServletRequest request) {
+                                         @RequestParam(defaultValue = "10") @Positive int size) {
         log.info("Getting events: rangeStart={}, from={}, size={}", rangeStart, from, size);
 
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
@@ -60,14 +58,27 @@ public class PublicEventController implements PublicEventOperations {
                 .size(size)
                 .build();
 
-        return eventService.getEvents(searchParams, request);
+        return eventService.getEvents(searchParams);
     }
 
     @GetMapping("/{id}")
     @Retry(name = "retryGet")
-    public EventFullDto getEvent(@PathVariable Long id, HttpServletRequest request) {
-        log.info("Getting event: id={}", id);
-        return eventService.getEvent(id, request);
+    public EventFullDto getEvent(@PathVariable Long id, @RequestHeader("X-EWM-USER-ID") Long userId) {
+        log.info("Getting event: id={} by user={}", id, userId);
+        return eventService.getEvent(id, userId);
+    }
+
+    @GetMapping("/recommendations")
+    public List<EventShortDto> getRecommendations(@RequestHeader("X-EWM-USER-ID") Long userId,
+                                                  @RequestParam(defaultValue = "10") Integer size) {
+        log.info("Getting recommendations for user {}", userId);
+        return eventService.getRecommendations(userId, size);
+    }
+
+    @PutMapping("/{id}/like")
+    public void likeEvent(@PathVariable Long id, @RequestHeader("X-EWM-USER-ID") Long userId) {
+        log.info("Like for event {} from user {}", id, userId);
+        eventService.likeEvent(id, userId);
     }
 
     @Override

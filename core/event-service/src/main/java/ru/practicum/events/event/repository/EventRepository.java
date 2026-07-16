@@ -5,10 +5,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
-import ru.practicum.events.event.model.Event;
-import ru.practicum.interaction.dto.event.EventState;
 import ru.practicum.events.category.model.Category_;
+import ru.practicum.events.event.model.Event;
 import ru.practicum.events.event.model.Event_;
+import ru.practicum.interaction.dto.event.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;
