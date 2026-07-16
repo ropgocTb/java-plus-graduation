@@ -38,13 +38,13 @@ public class AggregatorStarter {
                 for (ConsumerRecord<String, UserActionAvro> record : records) {
                     try {
                         aggregator.processAction(record.value());
+                        consumer.commitAsync();
                     } catch (Exception e) {
                         log.error("Ошибка во время обработки события uid={} eid={}", record.value().getUserId(),
                                 record.value().getEventId());
                     }
                 }
 
-                consumer.commitAsync();
             }
         } catch (WakeupException ignored) {
 

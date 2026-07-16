@@ -38,13 +38,13 @@ public class SimilarityStarter {
                 for (ConsumerRecord<String, EventSimilarityAvro> record : records) {
                     try {
                         service.saveSimilarity(record.value());
+                        consumer.commitAsync();
                     } catch (Exception e) {
                         log.error("Ошибка во время сохранения похожести событий {} {}", record.value().getEventA(),
                                 record.value().getEventB());
                     }
                 }
 
-                consumer.commitAsync();
             }
         } catch (WakeupException ignored) {
 

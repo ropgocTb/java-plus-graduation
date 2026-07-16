@@ -38,13 +38,13 @@ public class InteractionStarter implements Runnable {
                 for (ConsumerRecord<String, UserActionAvro> record : records) {
                     try {
                         service.saveInteraction(record.value());
+                        consumer.commitAsync();
                     } catch (Exception e) {
                         log.error("Ошибка во время сохранения взаимодействия  ui={} ei={}", record.value().getUserId(),
                                 record.value().getEventId());
                     }
                 }
 
-                consumer.commitAsync();
             }
         } catch (WakeupException ignored) {
 
