@@ -2,6 +2,7 @@ package ru.yandex.practicum.analyzer.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.stats.avro.ActionTypeAvro;
 import ru.practicum.ewm.stats.avro.EventSimilarityAvro;
@@ -74,7 +75,8 @@ public class RecommendationsService {
     }
 
     public List<Map.Entry<Long, Double>> getRecommendations(long userId, int maxResults) {
-        List<Interaction> recent = interactionRepository.findAllByUserIdOrderByTimestampDesc(userId);
+        List<Interaction> recent = interactionRepository
+                .findAllByUserIdOrderByTimestampDesc(userId, PageRequest.of(0, maxResults));
 
         if (recent.isEmpty()) return List.of();
 
