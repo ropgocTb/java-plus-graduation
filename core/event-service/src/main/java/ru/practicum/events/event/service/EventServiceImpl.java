@@ -158,7 +158,7 @@ public class EventServiceImpl implements EventService {
 
         enrichEvent(event);
 
-        collectorClient.sendView(id, userId);
+        collectorClient.sendView(userId, id);
 
         return eventMapper.mapToEventFullDto(event);
     }
